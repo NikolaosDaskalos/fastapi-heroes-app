@@ -1,3 +1,5 @@
+"""Database engine and session helpers."""
+
 from sqlmodel import create_engine, SQLModel, Session
 from app.config import get_settings
 

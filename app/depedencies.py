@@ -1,3 +1,5 @@
+"""Shared FastAPI dependencies for database sessions, auth, and pagination."""
+
 from typing import Annotated
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -21,6 +23,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], session: SessionDep) -> User:
+    """Decode a bearer token and return the matching authenticated user."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -45,6 +48,7 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 def get_current_admin(current_user: CurrentUser) -> User:
+    """Require the authenticated user to have admin privileges."""
     if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

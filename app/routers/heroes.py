@@ -1,3 +1,5 @@
+"""Hero CRUD routes and deletion safeguards."""
+
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
@@ -20,11 +22,13 @@ def create_hero(data: HeroCreateRequest, session: SessionDep, _user: CurrentUser
 
 @router.get("", response_model=list[HeroResponse])
 def get_all_heroes(session: SessionDep, page: Page):
+    """Return a paginated list of heroes."""
     return session.exec(select(Hero).offset(page['skip']).limit(page['limit'])).all()
 
 
 @router.get("/{hero_id}", response_model=HeroResponse)
 def get_hero(session: SessionDep, hero_id: int):
+    """Return a single hero by id."""
     hero = session.get(Hero, hero_id)
     if not hero:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Hero not found")
@@ -33,6 +37,7 @@ def get_hero(session: SessionDep, hero_id: int):
 
 @router.patch("/{hero_id}", response_model=HeroResponse)
 def update_hero(patch: HeroUpdateRequest, hero_id: int, session: SessionDep, _user: CurrentUser):
+    """Apply the provided hero fields to an existing hero."""
     hero = session.get(Hero, hero_id)
     if not hero:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Hero not found")
@@ -48,6 +53,7 @@ def update_hero(patch: HeroUpdateRequest, hero_id: int, session: SessionDep, _us
 
 @router.delete("/{hero_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_hero(session: SessionDep, hero_id: int, _admin: CurrentAdmin):
+    """Delete a hero only when they have no active missions."""
     hero = session.get(Hero, hero_id)
     if not hero:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Hero not found")

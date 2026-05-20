@@ -1,3 +1,5 @@
+"""FastAPI application setup and route registration."""
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from sqlmodel import SQLModel
@@ -13,6 +15,7 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Create database tables when the application starts."""
     SQLModel.metadata.create_all(engine)
     yield
 

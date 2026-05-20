@@ -1,3 +1,5 @@
+"""Mission CRUD routes and hero assignment validation."""
+
 from fastapi import APIRouter, status, HTTPException
 from sqlmodel import select
 from app.models.models import Hero, Mission
@@ -9,6 +11,7 @@ router = APIRouter(prefix="/missions", tags=["missions"])
 
 @router.post("", response_model=MissionResponse, status_code=status.HTTP_201_CREATED)
 def create_mission(mission: MissionCreateRequest, session: SessionDep, _user: CurrentUser):
+    """Create a mission assigned to an existing hero."""
     hero = session.get(Hero, mission.hero_id)
     if not hero:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Hero not found")
@@ -27,11 +30,13 @@ def create_mission(mission: MissionCreateRequest, session: SessionDep, _user: Cu
 
 @router.get("", response_model=list[MissionResponse])
 def get_all_missions(session: SessionDep, page: Page):
+    """Return a paginated list of missions."""
     return session.exec(select(Mission).offset(page["skip"]).limit(page["limit"])).all()
 
 
 @router.get("/{mission_id}", response_model=MissionResponse)
 def get_mission(mission_id: int, session: SessionDep):
+    """Return a single mission by id."""
     mission = session.get(Mission, mission_id)
     if not mission:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mission not found")
@@ -40,6 +45,7 @@ def get_mission(mission_id: int, session: SessionDep):
 
 @router.patch("/{mission_id}", response_model=MissionResponse)
 def update_mission(mission_id: int, patch: MissionUpdateRequest, session: SessionDep, _user: CurrentUser):
+    """Apply the provided mission fields to an existing mission."""
     mission = session.get(Mission, mission_id)
     if not mission:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mission not found")
@@ -55,6 +61,7 @@ def update_mission(mission_id: int, patch: MissionUpdateRequest, session: Sessio
 
 @router.delete("/{mission_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_mission(mission_id: int, session: SessionDep, _admin: CurrentAdmin):
+    """Delete an existing mission."""
     mission = session.get(Mission, mission_id)
     if not mission:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Mission not found")

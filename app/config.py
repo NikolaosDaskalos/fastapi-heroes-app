@@ -1,5 +1,6 @@
-from functools import lru_cache
+"""Configuration loading for database, JWT, and CORS settings."""
 
+from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

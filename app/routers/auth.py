@@ -1,3 +1,5 @@
+"""Authentication routes for registration, login, and current-user lookup."""
+
 from typing import Annotated
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordRequestForm
@@ -13,6 +15,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(data: UserCreateRequest, session: SessionDep):
+    """Register a new user and persist their hashed password."""
     existing_user = session.exec(select(User).where(User.username == data.username)).first()
     if existing_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Username already exists")
@@ -31,6 +34,7 @@ def register(data: UserCreateRequest, session: SessionDep):
 
 @router.post("/login", response_model=TokenResponse)
 def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], session: SessionDep):
+    """Authenticate credentials and return a bearer access token."""
     user: User | None = session.exec(select(User).where(User.username == form.username.strip())).first()
 
     if not user or not verify_password(form.password.strip(), user.hashed_password):
@@ -45,4 +49,5 @@ def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], session: Sessio
 
 @router.get("/me", response_model=UserResponse)
 def me(user: CurrentUser):
+    """Return the user associated with the current bearer token."""
     return user
