@@ -1,6 +1,6 @@
 """Pydantic schemas for mission request and response payloads."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class MissionCreateRequest(BaseModel):
@@ -22,6 +22,7 @@ class MissionUpdateRequest(BaseModel):
 
 class MissionResponse(BaseModel):
     """Mission data returned by the API."""
+    model_config = ConfigDict(extra="forbid")
 
     id: int
     title: str

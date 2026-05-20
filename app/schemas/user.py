@@ -1,7 +1,6 @@
 """Pydantic schemas for user registration and response payloads."""
 
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel, Field, ConfigDict
 
 class UserCreateRequest(BaseModel):
     """Payload used to register a new user."""
@@ -12,7 +11,7 @@ class UserCreateRequest(BaseModel):
 
 class UserResponse(BaseModel):
     """User data returned by the API without password details."""
+    model_config = ConfigDict(extra="forbid")
 
-    id: int
     username: str
     is_admin: bool

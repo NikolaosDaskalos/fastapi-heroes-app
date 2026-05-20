@@ -1,6 +1,6 @@
 """Pydantic schemas for hero request and response payloads."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class HeroCreateRequest(BaseModel):
@@ -23,6 +23,7 @@ class HeroUpdateRequest(BaseModel):
 
 class HeroResponse(BaseModel):
     """Hero data returned by the API."""
+    model_config = ConfigDict(extra="forbid")
 
     id: int
     name: str

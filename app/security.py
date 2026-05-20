@@ -8,10 +8,8 @@ Provides:
 """
 
 from datetime import datetime, timedelta, timezone
-
 from jose import jwt
 from passlib.context import CryptContext
-
 from app.config import get_settings
 
 settings = get_settings()
