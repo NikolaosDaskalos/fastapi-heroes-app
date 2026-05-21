@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import select
-from app.depedencies import SessionDep, CurrentUser
+from app.dependencies import SessionDep, CurrentUser
 from app.models.models import User
 from app.schemas.token import TokenResponse
 from app.schemas.user import UserCreateRequest, UserResponse

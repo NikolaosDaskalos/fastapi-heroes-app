@@ -3,7 +3,7 @@
 from fastapi import APIRouter, HTTPException, status
 from sqlmodel import select
 
-from app.depedencies import CurrentUser, SessionDep, Page, CurrentAdmin
+from app.dependencies import CurrentUser, SessionDep, Page, CurrentAdmin
 from app.schemas.hero import HeroResponse, HeroCreateRequest, HeroUpdateRequest
 from app.models.models import Hero, Mission
 

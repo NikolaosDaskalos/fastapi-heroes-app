@@ -213,6 +213,9 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
+# SQLite DB file
+.db
+
 # Streamlit
 .streamlit/secrets.toml
 .DS_Store

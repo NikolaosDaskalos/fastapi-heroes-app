@@ -3,7 +3,7 @@
 from fastapi import APIRouter, status, HTTPException
 from sqlmodel import select
 from app.models.models import Hero, Mission
-from app.depedencies import CurrentUser, CurrentAdmin, SessionDep, Page
+from app.dependencies import CurrentUser, CurrentAdmin, SessionDep, Page
 from app.schemas.mission import MissionUpdateRequest, MissionCreateRequest, MissionResponse
 
 router = APIRouter(prefix="/missions", tags=["missions"])
