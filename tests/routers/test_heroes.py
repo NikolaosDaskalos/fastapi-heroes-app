@@ -245,3 +245,104 @@ class TestHeroes:
         assert response.status_code == status.HTTP_204_NO_CONTENT
         get_response = client.get(f"{HEROES_URL}/{created_hero.id}")
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_hero_creation_with_whitespace_in_name_and_power(self, client, logged_in_user):
+        """Test Hero creation with leading and trailing whitespace in name and power."""
+        hero_response = create_hero(client, name="  hero_name  ", power="  hero_power  ")
+
+        assert hero_response.id >= 1
+        assert hero_response.name == "hero_name"
+        assert hero_response.power == "hero_power"
+
+    def test_hero_update_with_partial_fields(self, client, logged_in_user):
+        """Test Hero update with only some fields provided."""
+        created_hero = create_hero(client)
+
+        partial_update_payload = {
+            "level": 5
+        }
+
+        response = client.patch(
+            f"{HEROES_URL}/{created_hero.id}",
+            json=partial_update_payload,
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        hero_response = HeroResponse.model_validate(response.json())
+        assert hero_response.id == created_hero.id
+        assert hero_response.level == 5
+        assert hero_response.name == created_hero.name  # unchanged
+        assert hero_response.power == created_hero.power  # unchanged
+        assert hero_response.active == created_hero.active  # unchanged
+
+    def test_hero_creation_with_boundary_values(self, client, logged_in_user):
+        """Test Hero creation with boundary values for level, name, and power."""
+        # Test minimum level
+        hero_response = create_hero(client, level=1)
+        assert hero_response.level == 1
+
+        # Test maximum level
+        hero_response = create_hero(client, level=100)
+        assert hero_response.level == 100
+
+        # Test minimum name length
+        hero_response = create_hero(client, name="abc")
+        assert hero_response.name == "abc"
+
+        # Test maximum name length
+        hero_response = create_hero(client, name="a" * 50)
+        assert hero_response.name == "a" * 50
+
+        # Test minimum power length
+        hero_response = create_hero(client, power="abc")
+        assert hero_response.power == "abc"
+
+        # Test maximum power length
+        hero_response = create_hero(client, power="p" * 50)
+        assert hero_response.power == "p" * 50
+
+    def test_hero_update_active_field_in_isolation(self, client, logged_in_user):
+        """Test updating the active field in isolation."""
+        created_hero = create_hero(client)
+
+        response = client.patch(
+            f"{HEROES_URL}/{created_hero.id}",
+            json={"active": True},
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        hero_response = HeroResponse.model_validate(response.json())
+        assert hero_response.active is True
+
+    def test_hero_update_with_multiple_partial_updates(self, client, logged_in_user):
+        """Test multiple partial updates in sequence."""
+        created_hero = create_hero(client)
+
+        # First partial update
+        response = client.patch(
+            f"{HEROES_URL}/{created_hero.id}",
+            json={"level": 10},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        hero_response = HeroResponse.model_validate(response.json())
+        assert hero_response.level == 10
+
+        # Second partial update
+        response = client.patch(
+            f"{HEROES_URL}/{created_hero.id}",
+            json={"power": "new_power"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        hero_response = HeroResponse.model_validate(response.json())
+        assert hero_response.power == "new_power"
+
+    def test_hero_update_with_invalid_partial_payload(self, client, logged_in_user):
+        """Test updating with invalid values in a partial payload."""
+        created_hero = create_hero(client)
+
+        response = client.patch(
+            f"{HEROES_URL}/{created_hero.id}",
+            json={"level": 0},
+        )
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
