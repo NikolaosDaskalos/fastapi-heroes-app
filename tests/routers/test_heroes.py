@@ -245,3 +245,24 @@ class TestHeroes:
         assert response.status_code == status.HTTP_204_NO_CONTENT
         get_response = client.get(f"{HEROES_URL}/{created_hero.id}")
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_hero_deletion_with_mixed_missions(self, client, logged_in_admin):
+        """Test Hero delete request when hero has mixed mission statuses."""
+        created_hero = create_hero(client)
+        create_mission(client, created_hero.id, completed=True, title="Completed mission")
+        create_mission(client, created_hero.id, completed=False, title="Active mission")
+
+        response = client.delete(f"{HEROES_URL}/{created_hero.id}")
+
+        assert response.status_code == status.HTTP_409_CONFLICT
+        assert response.json()["detail"] == "Hero has active mission(s)"
+
+    def test_hero_deletion_with_no_missions(self, client, logged_in_admin):
+        """Test Hero delete request when hero has no missions."""
+        created_hero = create_hero(client)
+
+        response = client.delete(f"{HEROES_URL}/{created_hero.id}")
+
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        get_response = client.get(f"{HEROES_URL}/{created_hero.id}")
+        assert get_response.status_code == status.HTTP_404_NOT_FOUND
