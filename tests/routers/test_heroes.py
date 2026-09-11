@@ -245,3 +245,24 @@ class TestHeroes:
         assert response.status_code == status.HTTP_204_NO_CONTENT
         get_response = client.get(f"{HEROES_URL}/{created_hero.id}")
         assert get_response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_hero_creation_trims_whitespace(self, client, logged_in_user):
+        """Test Hero creation trims leading and trailing whitespace."""
+        hero_response = create_hero(client, name="  hero_name  ", power="  hero_power  ")
+
+        assert hero_response.name == "hero_name"
+        assert hero_response.power == "hero_power"
+
+    def test_hero_update_trims_whitespace(self, client, logged_in_user):
+        """Test Hero update trims leading and trailing whitespace."""
+        created_hero = create_hero(client)
+
+        response = client.patch(
+            f"{HEROES_URL}/{created_hero.id}",
+            json={"name": "  updated_hero  ", "power": "  updated_power  "},
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        hero_response = HeroResponse.model_validate(response.json())
+        assert hero_response.name == "updated_hero"
+        assert hero_response.power == "updated_power"
